@@ -22,13 +22,14 @@ class Parser
      * @param string $url
      * @param int|null $attempts
      * @param array $curl_opts
+     * @param bool $handle_unknown_fields
      * @return Feed
      * @throws CurlError
      * @throws Error
      * @throws Exceptions\UnknownField
      * @throws HttpError
      */
-    public static function getFeed(string $url, int $attempts = null, array $curl_opts = []): Feed
+    public static function getFeed(string $url, int $attempts = null, array $curl_opts = [], bool $handle_unknown_fields = true): Feed
     {
         if ($attempts === null) {
             $attempts = 1;
@@ -72,7 +73,7 @@ class Parser
             throw new HttpError($curl_info['http_code']);
         }
 
-        return Feed::make($url, $response, $curl_info);
+        return Feed::make($url, $response, $curl_info, $handle_unknown_fields);
     }
 
     /**

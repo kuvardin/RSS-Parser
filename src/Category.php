@@ -2,6 +2,7 @@
 
 namespace RssParser;
 
+use RssParser\Exceptions\UnknownField;
 use SimpleXMLElement;
 
 /**
@@ -34,9 +35,11 @@ class Category
 
     /**
      * @param SimpleXMLElement $data
+     * @param bool $handle_unknown_fields
      * @return static|null
+     * @throws UnknownField
      */
-    public static function make(SimpleXMLElement $data): ?self
+    public static function make(SimpleXMLElement $data, bool $handle_unknown_fields = true): ?self
     {
         $data_string = Parser::filterString($data);
         if ($data_string === null) {
@@ -46,8 +49,17 @@ class Category
         $category = new self($data_string);
 
         $attributes = $data->attributes();
-        if ($attributes !== null && !empty($attributes->domain)) {
-            $category->domain = Parser::filterString($attributes->domain);
+        foreach ($attributes as $name => $value) {
+            switch ($name) {
+                case 'domain':
+                    $category->domain = Parser::filterString($value);
+                    break;
+
+                default:
+                    if ($handle_unknown_fields) {
+                        throw new UnknownField(self::class, $name, $value);
+                    }
+            }
         }
 
         return $category;

@@ -61,10 +61,11 @@ class Image
 
     /**
      * @param SimpleXMLElement $data
+     * @param bool $handle_unknown_fields
      * @return static|null
      * @throws UnknownField
      */
-    public static function make(SimpleXMLElement $data): ?self
+    public static function make(SimpleXMLElement $data, bool $handle_unknown_fields = true): ?self
     {
         if (empty($data->url)) {
             return null;
@@ -104,7 +105,9 @@ class Image
                     break;
 
                 default:
-                    throw new UnknownField(self::class, $name, $value);
+                    if ($handle_unknown_fields) {
+                        throw new UnknownField(self::class, $name, $value);
+                    }
             }
         }
 

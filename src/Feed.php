@@ -152,16 +152,23 @@ class Feed
      * @param string $url
      * @param string $response
      * @param array $curl_info
+     * @param bool $handle_unknown_fields
      * @return static
      * @throws Error
      * @throws UnknownField
      */
-    public static function make(string $url, string $response, array $curl_info): self
+    public static function make(string $url, string $response, array $curl_info, bool $handle_unknown_fields = true): self
     {
-        $xml = @simplexml_load_string($response);
+//        $response = preg_replace('#<(\w+):(\w+)#u', '<$1___$2', $response);
+//        $response = preg_replace('#</(\w+):(\w+)#u', '</$1___$2', $response);
+        $f = fopen('cache.txt', 'w');
+        fwrite($f, print_r($response, true));
+        fclose($f);
+
+        $xml = simplexml_load_string($response);
         if ($xml === false) {
             $response = preg_replace('|^(.*?)<\?xml|us', '<?xml', $response);
-            $xml = @simplexml_load_string($response);
+            $xml = simplexml_load_string($response, 'SimpleXMLElement');
             if ($xml === false) {
                 if (mb_strpos($response, '<?xml') !== 0) {
                     throw new Error(Error::IS_NOT_XML);
@@ -208,7 +215,7 @@ class Feed
                     break;
 
                 case 'image':
-                    $feed->image = Image::make($value);
+                    $feed->image = Image::make($value, $handle_unknown_fields);
                     break;
 
                 case 'id':
@@ -279,7 +286,7 @@ class Feed
 
                 case 'item':
                     foreach ($channel->item as $item_data) {
-                        $item = Item::make($item_data);
+                        $item = Item::make($item_data, $handle_unknown_fields);
                         if ($item !== null) {
                             $feed->items[] = $item;
                         }
@@ -304,7 +311,9 @@ class Feed
                     break;
 
                 default:
-                    throw new UnknownField(self::class, $name, $value);
+                    if ($handle_unknown_fields) {
+                        throw new UnknownField(self::class, $name, $value);
+                    }
             }
         }
 

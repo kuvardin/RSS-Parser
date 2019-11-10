@@ -133,11 +133,12 @@ class Item
 
     /**
      * @param SimpleXMLElement $item_data
+     * @param bool $handle_unknown_fields
      * @return static|null
      * @throws Error
      * @throws UnknownField
      */
-    public static function make(SimpleXMLElement $item_data): ?self
+    public static function make(SimpleXMLElement $item_data, bool $handle_unknown_fields = true): ?self
     {
         if (empty($item_data->link)) {
             return null;
@@ -216,7 +217,7 @@ class Item
 
                 case 'enclosure':
                     foreach ($item_data->enclosure as $enclosure_data) {
-                        $enclosure = Enclosure::make($enclosure_data);
+                        $enclosure = Enclosure::make($enclosure_data, $handle_unknown_fields);
                         if ($enclosure !== null) {
                             $item->enclosure[] = $enclosure;
                         }
@@ -249,7 +250,7 @@ class Item
 
                 case 'category':
                     foreach ($item_data->category as $category) {
-                        $item->categories[] = Category::make($category);
+                        $item->categories[] = Category::make($category, $handle_unknown_fields);
                     }
                     break;
 
@@ -270,7 +271,9 @@ class Item
                     break;
 
                 default:
-                    throw new UnknownField(self::class, $name, $value);
+                    if ($handle_unknown_fields) {
+                        throw new UnknownField(self::class, $name, $value);
+                    }
             }
         }
 
