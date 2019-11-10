@@ -37,24 +37,27 @@ class Parser
         }
 
         $ch = curl_init($url);
-        curl_setopt_array($ch, array_merge([
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HEADER => false,
-            CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
-            CURLOPT_TIMEOUT => self::TIMEOUT,
-            CURLOPT_USERAGENT => self::USER_AGENT,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTPHEADER => [
-                'DNT: 1',
-                'Upgrade-Insecure-Requests: 1',
-                'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-                'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-                'Content-type: text/html; charset=UTF-8',
-            ],
+        $options = [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HEADER => false,
+                CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+                CURLOPT_TIMEOUT => self::TIMEOUT,
+                CURLOPT_USERAGENT => self::USER_AGENT,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTPHEADER => [
+                    'DNT: 1',
+                    'Upgrade-Insecure-Requests: 1',
+                    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+                    'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+                    'Content-type: text/html; charset=UTF-8',
+                ],
 
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_SSL_VERIFYPEER => false,
-        ], $curl_opts));
+                CURLOPT_SSL_VERIFYHOST => false,
+                CURLOPT_SSL_VERIFYPEER => false,
+            ] + $curl_opts;
+
+        print_r($options);
+        curl_setopt_array($ch, $options);
 
         $response = false;
         for ($i = 0; $i < $attempts && !$response; $i++) {
@@ -69,7 +72,7 @@ class Parser
         if ($curl_info['http_code'] !== 200) {
             throw new HttpError($curl_info['http_code']);
         }
-        
+
         return Feed::make($url, $response, $curl_info);
     }
 
