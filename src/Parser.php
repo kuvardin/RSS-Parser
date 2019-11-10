@@ -56,7 +56,6 @@ class Parser
                 CURLOPT_SSL_VERIFYPEER => false,
             ] + $curl_opts;
 
-        print_r($options);
         curl_setopt_array($ch, $options);
 
         $response = false;
