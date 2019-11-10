@@ -1,0 +1,12 @@
+{
+    "name": "kuvardin/rss-parser",
+    "description": "PHP library for parse RSS-feeds",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Maxim Kuvardin",
+            "email": "maxim@kuvard.in"
+        }
+    ],
+    "require": {}
+}
